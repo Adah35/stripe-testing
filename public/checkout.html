@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Subscribe to a cool new product</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body>
+    <section>
+      <div class="product">
+        
+        <div>
+          <div class="description">
+            <h3>pro plan</h3>
+            <h5>$20.00 / month</h5>
+          </div>
+          </div>
+          <form action="/create-checkout-session" method="POST">
+            <!-- Add a hidden field with the lookup_key of your Price -->
+            <input type="hidden" name="planId" value="price_1NX44kIFHpV46ovRJP0aByaO" />
+            <button id="checkout-and-portal-button" type="submit">Checkout</button>
+          </form>
+        </div>
+        <div>
+          <div class="description">
+            <h3>starter plan</h3>
+            <h5>$10.00 / month</h5>
+          </div>
+          </div>
+          <form action="/create-checkout-session" method="POST">
+            <!-- Add a hidden field with the lookup_key of your Price -->
+            <input type="hidden" name="planId" value="price_1NX42UIFHpV46ovRkpL38zKS" />
+            <button id="checkout-and-portal-button" type="submit">Checkout</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
