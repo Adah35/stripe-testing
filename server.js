@@ -10,7 +10,7 @@ const { subscribe } = require('diagnostics_channel')
 const stripe = require('stripe')(process.env.STRIPE_ID)
 const port = 3500
 
-const YOUR_DOMAIN = 'http://localhost:3500'
+const YOUR_DOMAIN = 'https://my-stripe-app.onrender.com'
 app.use('/', express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
