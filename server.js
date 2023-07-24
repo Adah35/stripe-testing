@@ -1,4 +1,5 @@
-require('dotenv').config()
+const dotenv = require('dotenv')
+dotenv.config()
 const express = require('express')
 const connectDB = require('./config/dbConn')
 const { default: mongoose } = require('mongoose')
@@ -82,7 +83,7 @@ app.post('/customer-portal', async (req, res) => {
 app.post(
     '/webhook',
     express.raw({ type: 'application/json' }),
-    async (request, response) => {
+    async (req, res) => {
         let data;
         let eventType;
         let status
@@ -145,8 +146,8 @@ app.post(
                 // Unexpected event type
                 console.log(`Unhandled event type ${eventType}.`);
         }
-        // Return a 200 response to acknowledge receipt of the event
-        response.send();
+        // Return a 200 res to acknowledge receipt of the event
+        res.send();
     }
 );
 
