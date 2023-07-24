@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription App</title>
+    <!-- Add Tailwind CSS CDN link -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100">
+    <div class="container mx-auto mt-10 p-6">
+        <h1 class="text-2xl font-semibold mb-4">Choose a Plan</h1>
+        <div class="grid grid-cols-3 gap-4">
+            <!-- Plan 1 -->
+            <div class="bg-white rounded-lg shadow p-4 cursor-pointer transition duration-300 hover:shadow-lg">
+                <h2 class="text-lg font-semibold mb-2">Plan 1</h2>
+                <p class="text-gray-600 mb-4">$10/month</p>
+                <form action="/create-checkout-session" method="post">
+                    <input type="hidden" name="planId" value="price_1NX42UIFHpV46ovRkpL38zKS" />
+                    <input type="hidden" name="customerId" value="" id="customerId"/>
+                    <button data-plan-id="price_1"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500 focus:outline-none focus:bg-indigo-500">Select
+                        Plan</button>
+                </form>
+            </div>
+            <!-- Plan 2 -->
+            <div class="bg-white rounded-lg shadow p-4 cursor-pointer transition duration-300 hover:shadow-lg">
+                <h2 class="text-lg font-semibold mb-2">Plan 2</h2>
+                <p class="text-gray-600 mb-4">$20/month</p>
+                <form action="/create-checkout-session" method="post">
+                    <input type="hidden" name="planId" value="price_1NX44kIFHpV46ovRJP0aByaO" />
+                    <input type="hidden" name="customerId" id="customerId" value="" />
+                    <button data-plan-id="price_2"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500 focus:outline-none focus:bg-indigo-500">Select
+                        Plan</button>
+                </form>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-4 cursor-pointer transition duration-300 hover:shadow-lg">
+                <h2 class="text-lg font-semibold mb-2">MANAGE BILLING</h2>
+            
+                    <a href="/success.html"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500 focus:outline-none focus:bg-indigo-500">GO</a>
+            </div>
+        </div>
+
+
+    </div>
+<script>
+    
+        document.addEventListener('DOMContentLoaded', function () {
+            function checkLoggedIn() {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    // Redirect to the login page if the token is not present
+                    window.location.href = '/login.html';
+                }
+            }
+
+            // Call the checkLoggedIn function when the page loads
+            checkLoggedIn();
+            // Get the customer ID from localStorage (replace 'customer_id_key' with your actual key)
+            let customer = document.getElementById('customerId')
+            const customerId = localStorage.getItem('customer_id_key');
+            customer.setAttribute('value', customerId)
+            console.log(customerId)
+        })
+</script>
+</body>
+
+</html>

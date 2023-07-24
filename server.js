@@ -5,6 +5,7 @@ const { default: mongoose } = require('mongoose')
 const app = express()
 const path = require('path')
 const Subscription = require('./models/subscription')
+const { subscribe } = require('diagnostics_channel')
 const stripe = require('stripe')(process.env.STRIPE_ID)
 const port = 3500
 
@@ -15,79 +16,139 @@ app.use(express.json());
 connectDB()
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'checkout.html'))
+    res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
 
-// app.use('/', require('./routes/routes'))
+app.use('/', require('./routes/routes'))
+app.use('/auth', require('./routes/auth'))
 
 app.post('/create-checkout-session', async (req, res) => {
-    const { planId, email } = req.body;
-    console.log(req.body)
+    const { planId, customerId } = req.body;
+    console.log(customerId)
     try {
-        const customer = await stripe.customers.create({
-            email: email,
-            // Add any additional customer information here if needed
-        });
-        console.log(customer.id)
-        const prices = await stripe.prices.list({
-            lookup_keys: [req.body.planId],
-            expand: ['data.product'],
-        });
-        console.log(prices)
+        // Create a new Stripe Checkout Session
         const session = await stripe.checkout.sessions.create({
-            billing_address_collection: 'auto',
+            mode: 'subscription',
             line_items: [
                 {
-                    price: prices.data[0].id,
-                    // For metered billing, do not pass quantity
+                    price: planId,
                     quantity: 1,
                 },
             ],
-            mode: 'subscription',
+            customer: customerId,
             success_url: `${YOUR_DOMAIN}/success.html?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${YOUR_DOMAIN}/cancel.html`,
         });
-        // Save subscription information to your database
-        // const newSubscription = new Subscription({
-        //     customerId: customer.id,
-        //     subscriptionId: subscription.id,
-        //     planId: planId,
-        // });
-        // await newSubscription.save();
+        const subscription = new Subscription({
+            customerId: customerId,
+            planId: planId,
+            status: 'active',
+            subscriptionId: session.id,
+        });
 
+        try {
+            await subscription.save();
+        } catch (err) {
+            console.error('Error saving subscription:', err);
+        }
         res.redirect(303, session.url);
     } catch (err) {
         console.error('Error creating subscription:', err.message);
-        res.status(500).json({ error: 'An error occurred while creating the subscription' });
+        res.redirect(303, '/');
+        // res.status(500).json({ error: 'An error occurred while creating the subscription' });
     }
 });
-
-app.post('/create-portal-session', async (req, res) => {
+app.post('/customer-portal', async (req, res) => {
+    const { session_id, customer_id } = req.body
+    const subscribtion = await Subscription.findOne({ subscriptionId: session_id }).exec()
+    const customerId = subscribtion ? subscribtion.customerId : customer_id
     try {
-        // For demonstration purposes, we're using the Checkout session to retrieve the customer ID.
-        // Typically this is stored alongside the authenticated user in your database.
-        const { session_id } = req.body;
-        console.log(session_id)
-        const checkoutSession = await stripe.checkout.sessions.retrieve(session_id);
-
-        // This is the url to which the customer will be redirected when they are done
-        // managing their billing with the portal.
         const returnUrl = YOUR_DOMAIN;
 
         const portalSession = await stripe.billingPortal.sessions.create({
-            customer: checkoutSession.customer,
+            customer: customerId,
             return_url: returnUrl,
+
         });
 
         res.redirect(303, portalSession.url);
     } catch (err) {
         console.log('Error creating subscription:', err.message)
-        res.status(500).json({ error: 'An error occurred while creating the subscription' });
+        res.redirect(303, '/');
     }
 });
 
 
+app.post(
+    '/webhook',
+    express.raw({ type: 'application/json' }),
+    async (request, response) => {
+        let data;
+        let eventType;
+        let status
+        // Check if webhook signing is configured.
+        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
+        if (webhookSecret) {
+            // Retrieve the event by verifying the signature using the raw body and secret.
+            let event;
+            let signature = req.headers["stripe-signature"];
+
+            try {
+                event = stripe.webhooks.constructEvent(
+                    req.body,
+                    signature,
+                    webhookSecret
+                );
+            } catch (err) {
+                console.log(`⚠️  Webhook signature verification failed.`);
+                return res.sendStatus(400);
+            }
+            // Extract the object from the event.
+            data = event.data;
+            eventType = event.type;
+        } else {
+            // Webhook signing is recommended, but if the secret is not configured in `config.js`,
+            // retrieve the event data directly from the request body.
+            data = req.body.data;
+            eventType = req.body.type;
+        }
+        // Handle the event
+        switch (eventType) {
+            case 'checkout.session.completed':
+                subscription = data.object;
+                status = subscription.status;
+                const customerId = data.object.customer;
+                const planId = data.object.display_items[0].plan.id;
+                const currentPeriodEnd = new Date(data.object.current_period_end * 1000); // Convert to Date format
+
+                console.log(`Subscription status is ${status}.`);
+                console.log(subscription)
+
+                const subscription = new Subscription({
+                    customerId: customerId,
+                    planId: planId,
+                    status: status,
+                    subscriptionId: subscription.id,
+                    currentPeriodEnd: currentPeriodEnd,
+                });
+
+                try {
+                    await subscription.save();
+                } catch (err) {
+                    console.error('Error saving subscription:', err);
+                }
+                break
+
+
+            default:
+                // Unexpected event type
+                console.log(`Unhandled event type ${eventType}.`);
+        }
+        // Return a 200 response to acknowledge receipt of the event
+        response.send();
+    }
+);
 
 
 

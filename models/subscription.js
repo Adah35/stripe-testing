@@ -5,7 +5,7 @@ const subscriptionSchema = new mongoose.Schema({
     subscriptionId: { type: String, required: true },
     planId: { type: String, required: true },
     start_date: { type: Date, required: true, default: Date.now },
-    next_billing_date: { type: Date, required: true },
+    // next_billing_date: { type: Date, required: true },
     status: { type: String, enum: ['active', 'canceled', 'past_due'], required: true, default: 'active' },
     // Add any other subscription details you need
 }, { timestamps: true });

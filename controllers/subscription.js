@@ -3,7 +3,7 @@ const Subscription = require('../models/subscription')
 // Get all subscriptions
 const getAllSubscriptions = async (req, res) => {
     try {
-        const subscriptions = await Subscription.find().populate('user').populate('plan');
+        const subscriptions = await Subscription.find();
         res.json(subscriptions);
     } catch (error) {
         res.status(500).json({ error: 'Failed to get subscriptions' });
@@ -24,8 +24,8 @@ const getSubscriptionById = async (req, res) => {
 };
 
 // Create a new subscription
-const createSubscription = async (req, res) => {
-    const { user, plan, start_date, next_billing_date, status } = req.body
+const createSubscription = async (data) => {
+    const { user, plan, start_date, next_billing_date, status } = data
 
     try {
         const newSubscription = await Subscription.create(user, plan, start_date, next_billing_date, status);
@@ -36,7 +36,7 @@ const createSubscription = async (req, res) => {
 };
 
 // Update a subscription
-const updateSubscription = async (req, res) => {
+const updateSubscription = async (data) => {
     try {
         const updatedSubscription = await Subscription.findByIdAndUpdate(
             req.params.id,

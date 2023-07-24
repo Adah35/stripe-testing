@@ -24,6 +24,9 @@ section {
 .product {
   display: flex;
   flex-direction: row;
+  width: 100%;
+}
+.box {
 }
 .description {
   display: flex;

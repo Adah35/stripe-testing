@@ -6,5 +6,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (searchParams.has('session_id')) {
         const session_id = searchParams.get('session_id');
         document.getElementById('session-id').setAttribute('value', session_id);
+    } else {
+        const customer_id = localStorage.getItem('customer_id_key')
+        document.getElementById('customer_id').setAttribute('value', customer_id);
     }
 });
