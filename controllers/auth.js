@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 // Create a new customer in Stripe
 
 const signUp = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, username } = req.body;
     console.log(password)
     try {
         // Check if the user already exists
@@ -18,18 +18,31 @@ const signUp = async (req, res) => {
         const saltRounds = 10;
         const passwordHash = await bcrypt.hash(password, saltRounds);
 
-        // Create a new customer in Stripe
-        const customer = await stripe.customers.create({
-            email: email,
-        });
 
         // Save the customer ID and user details to your database
         const user = new User({
             email: email,
             password: passwordHash,
-            stripeCustomerId: customer.id,
+            stripeCustomerId: null,
         });
+
         await user.save();
+        console.log(user.id, 'aaaaaaaaaaa')
+        // Create a new customer in Stripe
+        const customer = await stripe.customers.create({
+            email: email,
+            name: username,
+            metadata: {
+                'userId': user.id,
+                'username': username,
+            }
+        });
+
+        user.stripeCustomerId = customer.id
+
+        console.log(customer)
+        await user.save();
+
 
         res.json({ message: 'Signup successful!' });
     } catch (err) {

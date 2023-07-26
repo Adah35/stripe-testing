@@ -19,6 +19,11 @@
                     class="mt-1 border p-3 p-2 w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200">
             </div>
             <div class="mb-4">
+                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                <input type="username" id="username" name="username"
+                    class="mt-1 border p-3 p-2 w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+            </div>
+            <div class="mb-4">
                 <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                 <input type="password" id="password" name="password"
                     class="mt-1 border p-3 p-2 w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200">
@@ -35,7 +40,7 @@
                 const formData = new FormData(event.target);
                 const email = formData.get('email');
                 const password = formData.get('password');
-
+                const username =  formData.get('username')
                 // Send signup data to the backend
                 try {
                     const response = await fetch('/auth/signup', {
@@ -43,7 +48,7 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ email, password })
+                        body: JSON.stringify({ email, password,username })
                     });
                     const data = await response.json();
                     alert(data.message);

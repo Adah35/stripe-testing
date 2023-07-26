@@ -10,7 +10,7 @@ const { subscribe } = require('diagnostics_channel')
 const stripe = require('stripe')(process.env.STRIPE_ID)
 const port = 3500
 
-const YOUR_DOMAIN = 'https://my-stripe-app.onrender.com'
+const YOUR_DOMAIN = 'http://localhost:3500'
 app.use('/', express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -63,6 +63,7 @@ app.post('/customer-portal', async (req, res) => {
     const { session_id, customer_id } = req.body
     const subscribtion = await Subscription.findOne({ subscriptionId: session_id }).exec()
     const customerId = subscribtion ? subscribtion.customerId : customer_id
+    console.log(customerId)
     try {
         const returnUrl = YOUR_DOMAIN;
 
