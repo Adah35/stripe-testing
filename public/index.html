@@ -10,6 +10,7 @@
 </head>
 
 <body class="bg-gray-100">
+    <button class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500 focus:outline-none focus:bg-indigo-500 m-3" id="btn">Logout</button>
     <div class="container mx-auto mt-10 p-6">
         <h1 class="text-2xl font-semibold mb-4">Choose a Plan</h1>
         <div class="grid grid-cols-3 gap-4">
@@ -49,7 +50,14 @@
 
     </div>
 <script>
-    
+
+        const btn = document.getElementById('btn')
+        btn.addEventListener('click',() => {
+            localStorage.removeItem('token')
+            localStorage.removeItem('customer_id_key')
+            window.location.href = '/login.html';
+            alert('Logout Successfull')
+        })
         document.addEventListener('DOMContentLoaded', function () {
             function checkLoggedIn() {
                 const token = localStorage.getItem('token');
